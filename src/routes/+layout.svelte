@@ -57,7 +57,6 @@
         text-transform: uppercase;
 
         color: white;
-
         text-align: center;
     }
 
