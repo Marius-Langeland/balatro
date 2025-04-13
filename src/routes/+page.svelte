@@ -16,7 +16,7 @@
             </Animated>
 
             <Animated><Interactable colorIndex={4} href='/connect'>
-                <Animated>Connect with</Animated>
+                <Animated>Connect with</Animated> &nbsp&nbsp
                 <Animated><img src={Logo} alt="discord"></Animated>
             </Interactable></Animated>
         </div>
