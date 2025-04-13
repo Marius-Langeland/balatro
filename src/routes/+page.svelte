@@ -12,7 +12,7 @@
             </Animated>
 
             <Animated>
-                <Interactable colorIndex={0} href='/stats'>My stats</Interactable>
+                <Interactable colorIndex={3} href='/stats'>My stats</Interactable>
             </Animated>
 
             <Animated><Interactable colorIndex={4} href='/connect'>
@@ -26,6 +26,7 @@
 <style>
     .content{
         display: flex;
+        padding: 1rem;
     }
 
     .buttons-panel{

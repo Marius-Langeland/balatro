@@ -2,10 +2,15 @@
     import Anim from "$lib/components/animated.svelte";
     import Interactable from "$lib/components/interactable.svelte";
     import Intr from "$lib/components/interactable.svelte";
+    import { browser } from "$app/environment";
 
     let connected = $state(false);
     
-    let mode = $state(parseInt(localStorage.getItem('mode') ?? '0'));
+    let initialMode = 0;
+    if(browser)
+        initialMode = parseInt(localStorage.getItem('mode') ?? '0');
+
+    let mode = $state(initialMode);
 
     $effect(() => {
         localStorage.setItem('mode', mode.toString());
@@ -33,7 +38,7 @@
         <div id="queue-info">
             <Anim><Intr colorIndex={2}>Enter queue</Intr></Anim>
             <Anim><div class="queue-count">Players in queue: {mode}</div></Anim>
-            <Anim><div class="player-count">Players in game: 44</div></Anim>
+            <Anim><div class="player-count">Players in game: NaNeInf</div></Anim>
         </div>
     </Interactable>
 </div>

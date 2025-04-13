@@ -30,12 +30,13 @@
         border-radius: .75rem;
         box-shadow: 0 8px 0 -2px rgb(37, 37, 37);
         display: flex;
-        gap: 1ch;
         align-items: center;
         justify-content: center;
         color: white;
         overflow: hidden;
         transition: scale .2s ease, background-color .2s ease;
+
+        text-shadow: 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     .grow:hover, .grow:focus{

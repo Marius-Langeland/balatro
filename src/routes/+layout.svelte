@@ -18,8 +18,12 @@
 
 <main class="jersey-10-regular">
     <div>
-        <Anim className='balatro'><Intr colorIndex={2}>Balatro</Intr></Anim>
-        <Anim className='multiplayer'><Intr colorIndex={3}>Multiplayer</Intr></Anim>
+        <Anim className='balatro'><Intr href='/' colorIndex={2}>
+            Bal
+            <Anim><span>a</span></Anim>
+            tro
+        </Intr></Anim>
+        <Anim className='multiplayer'><Intr href='/' colorIndex={3}>Multiplayer</Intr></Anim>
     </div>
     {@render children?.()}
 </main>
@@ -30,6 +34,15 @@
 
         background-size: 40px 40px;
         background-image: radial-gradient(circle, var(--clr-pallete-0) 2px, #00000000 4px);
+    }
+
+    span{
+        color: var(--clr-pallete-3);
+        background-color: white;
+        box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.508);
+        padding: 0 .5rem;
+        border-radius: .5rem;
+        margin: 0 3px 0 0;
     }
 
     main{
