@@ -3,6 +3,7 @@
     import Interactable from "$lib/components/interactable.svelte";
     import Intr from "$lib/components/interactable.svelte";
     import { browser } from "$app/environment";
+    import { startQueue } from "$lib/queue.svelte";
 
     let connected = $state(false);
     
@@ -36,7 +37,7 @@
     {/if}
     <Interactable colorIndex={5} grow={false}>
         <div id="queue-info">
-            <Anim><Intr colorIndex={2}>Enter queue</Intr></Anim>
+            <Anim><Intr colorIndex={2} callback={startQueue}>Enter queue</Intr></Anim>
             <Anim><div class="queue-count">Players in queue: {mode}</div></Anim>
             <Anim><div class="player-count">Players in game: NaNeInf</div></Anim>
         </div>
