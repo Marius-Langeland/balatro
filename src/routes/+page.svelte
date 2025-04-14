@@ -12,10 +12,9 @@
         <Animated>
             <Interactable colorIndex={3} href='/stats'>My stats</Interactable>
         </Animated>
-        <Animated><Interactable colorIndex={4} href='/connect'>
-            <Animated>Connect with</Animated> &nbsp&nbsp
-            <Animated><img src={Logo} alt="discord"></Animated>
-        </Interactable></Animated>
+        <Animated>
+            <Interactable colorIndex={4} href='/login'>Login</Interactable>
+    </Animated>
     </div>
 </Interactable></Animated>
 
