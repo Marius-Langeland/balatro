@@ -3,7 +3,8 @@
     import Interactable from "$lib/components/interactable.svelte";
     import Intr from "$lib/components/interactable.svelte";
     import { browser } from "$app/environment";
-    import { startQueue } from "$lib/queue.svelte";
+    import { getQueueCount, startQueue } from "$lib/queue.svelte";
+    const lerp = (x : number, y : number, a : number) => x * (1 - a) + y * a;
 
     let connected = $state(false);
     
@@ -13,8 +14,25 @@
 
     let mode = $state(initialMode);
 
+    let queueCount = $state(0);
+    async function updateQueueCount(){
+        let newCount = await getQueueCount();
+        let oldCount = queueCount;
+        let t = 0;
+        let interval = setInterval(() => {
+            t = Math.min(t + .025, 1);
+            queueCount = Math.round(lerp(oldCount, newCount, t));
+            if(t >= 1) return;
+        }, 10);
+
+        setTimeout(() => {
+            clearInterval(interval);
+        }, 400);
+    }
+
     $effect(() => {
         localStorage.setItem('mode', mode.toString());
+        updateQueueCount();
     })
 
     let gridMode = $derived(connected ? 'grid connected' : 'grid');
@@ -38,7 +56,7 @@
     <Interactable colorIndex={5} grow={false}>
         <div id="queue-info">
             <Anim><Intr colorIndex={2} callback={startQueue}>Enter queue</Intr></Anim>
-            <Anim><div class="queue-count">Players in queue: {mode}</div></Anim>
+            <Anim><div class="queue-count">Players in queue: {queueCount}</div></Anim>
             <Anim><div class="player-count">Players in game: NaNeInf</div></Anim>
         </div>
     </Interactable>
