@@ -24,8 +24,8 @@
     }
 
     @keyframes translate{
-        0% {translate: 0 1px}
-        50% {translate: 0 -1px}
-        100% {translate: 0 1px}
+        0% {translate: 0 1px;}
+        50% {translate: 0 -1px;}
+        100% {translate: 0 1px;}
     }
 </style>
