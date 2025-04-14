@@ -17,9 +17,7 @@ const queueStatus = $derived(
 export let getQueue = () => queue;
 export let getQueueStatus = () => queueStatus;
 
-export async function startQueue(){
-    // Check database if we are already queuing
-    queue.uid = 'waiting';
+export async function checkQueue(){
     let snapshot = await queueLookup();
 
     if(snapshot.exists()){
@@ -27,13 +25,25 @@ export async function startQueue(){
         queue.elo = data.elo;
         queue.uid = data.uid;
         queue.queueMode = data.queueMode;
+        return true;
     }
-    else{
+    return false;
+}
+
+export async function startQueue(){
+    // Check database if we are already queuing
+    queue.uid = 'waiting';
+    let isInQueue = await checkQueue();
+    if(!isInQueue){
         let doc = await addQueue();
         queue.elo = doc.data.elo;
         queue.queueMode = doc.data.queueMode;
         queue.uid = doc.data.uid;
     }
+}
+
+export async function leaveQueue(){
+
 }
 
 export async function getQueueCount(){
