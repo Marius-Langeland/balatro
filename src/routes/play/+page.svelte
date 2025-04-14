@@ -1,28 +1,10 @@
 <script lang="ts">
     import Anim from "$lib/components/animated.svelte";
     import Intr from "$lib/components/interactable.svelte";
-    import { getQueueCount, startQueue, getQueueStatus, leaveQueue, checkQueue } from "$lib/queue.svelte";
+    import { startQueue, getQueueStatus, leaveQueue, checkQueue, getQueueCount, updateQueueCount } from "$lib/queue.svelte";
     import { onMount } from "svelte";
-    const lerp = (x : number, y : number, a : number) => x * (1 - a) + y * a;
-
-    let connected = $state(false);
+    
     let mode = $state(0);
-
-    let queueCount = $state(0);
-    async function updateQueueCount(){
-        let newCount = await getQueueCount();
-        let oldCount = queueCount;
-        let t = 0;
-        let interval = setInterval(() => {
-            t = Math.min(t + .025, 1);
-            queueCount = Math.round(lerp(oldCount, newCount, t));
-            if(t >= 1) return;
-        }, 10);
-
-        setTimeout(() => {
-            clearInterval(interval);
-        }, 400);
-    }
 
     onMount(() => {
         checkQueue();
@@ -41,11 +23,11 @@
     <Intr colorIndex={5} grow={false}>
         <div id="queue-info">
             {#if getQueueStatus() != 'yes' }
-                <Anim><Intr colorIndex={2} callback={startQueue}>Enter queue</Intr></Anim>
+                <Anim><Intr colorIndex={2} callback={startQueue}>Search for match</Intr></Anim>
             {:else}
-                <Anim><Intr colorIndex={3} callback={leaveQueue}>Leave queue</Intr></Anim>
+                <Anim><Intr colorIndex={3} callback={leaveQueue}>Stop search</Intr></Anim>
             {/if}
-            <Anim><div class="queue-count">Players in queue: {queueCount}</div></Anim>
+            <Anim><div class="queue-count">Players in queue: {getQueueCount()}</div></Anim>
             <Anim><div class="player-count">Players in game: NaNeInf</div></Anim>
         </div>
     </Intr>
@@ -57,7 +39,7 @@
         min-width: 500px;
         gap: 2px 1rem;
         
-        grid-template-columns: 1fr 2fr;
+        grid-template-columns: 2fr 5fr;
 
         grid-template-areas: 
         "mode queue";
@@ -81,10 +63,6 @@
         border-radius: .5rem;
     }
 
-    .enter-queue{
-        margin-bottom: 1rem;
-        color: rgb(255, 255, 255);
-    }
     .queue-count{margin-top: 1rem;}
     .queue-count, .player-count{
         grid-area: mode;

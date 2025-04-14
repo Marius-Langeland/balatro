@@ -1,6 +1,6 @@
 import { PUBLIC_FIREBASE_CONFIG } from "$env/static/public";
 import { initializeApp } from 'firebase/app';
-import { setDoc, doc, type Firestore, getDocFromServer, getFirestore } from 'firebase/firestore';
+import { setDoc, doc, type Firestore, getDocFromServer, getFirestore, deleteDoc } from 'firebase/firestore';
 import { type Auth, getAuth } from "firebase/auth";
 import { PlayerQueue, playerQueueConverter } from "./types";
 
@@ -31,4 +31,11 @@ export const addQueue = async () => {
     let docRef = setDoc(col, playerQueueConverter.toFirestore(data));
 
     return {docRef, data};
+}
+
+export const removeQueue = async () => {
+    const fb = getFirebase();
+    const uid = fb.auth.currentUser?.uid ?? 'empty';
+    let col = doc(fb.firestore, 'Queue', uid);
+    deleteDoc(col);
 }
