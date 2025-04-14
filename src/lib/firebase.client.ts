@@ -1,6 +1,6 @@
 import { PUBLIC_FIREBASE_CONFIG } from "$env/static/public";
 import { initializeApp } from 'firebase/app';
-import { collection, type Firestore, getDocsFromServer, getFirestore, query, where } from 'firebase/firestore';
+import { doc, type Firestore, getDocFromServer, getFirestore } from 'firebase/firestore';
 import { type Auth, getAuth } from "firebase/auth";
 
 export const getFirebase = () => {
@@ -17,8 +17,10 @@ export const queueLookup = async () => {
     const fb = getFirebase();
     const uid = fb.auth.currentUser?.uid;
 
-    let col = collection(fb.firestore, 'Queue');
-    let q = query(col, where('uid', '==', uid));
-    let response = getDocsFromServer(q);
+    if(uid == undefined)
+        return;
+
+    let col = doc(fb.firestore, 'Queue', uid);
+    let response = getDocFromServer(col);
     return await response;
 }
