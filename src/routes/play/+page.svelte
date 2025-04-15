@@ -1,15 +1,10 @@
 <script lang="ts">
     import Anim from "$lib/components/animated.svelte";
     import Intr from "$lib/components/interactable.svelte";
-    import { startQueue, getQueueStatus, leaveQueue, checkQueue, getQueueCount, updateQueueCount } from "$lib/queue.svelte";
     import { onMount } from "svelte";
     
     let mode = $state(0);
 
-    onMount(() => {
-        checkQueue();
-        updateQueueCount();
-    })
 </script>
 
 <div class='grid'>
@@ -22,12 +17,12 @@
 
     <Intr colorIndex={5} grow={false}>
         <div id="queue-info">
-            {#if getQueueStatus() != 'yes' }
-                <Anim><Intr colorIndex={2} callback={startQueue}>Search for match</Intr></Anim>
+            {#if true }
+                <Anim><Intr colorIndex={2}>Search for match</Intr></Anim>
             {:else}
-                <Anim><Intr colorIndex={3} callback={leaveQueue}>Stop search</Intr></Anim>
+                <Anim><Intr colorIndex={3}>Stop search</Intr></Anim>
             {/if}
-            <Anim><div class="queue-count">Players in queue: {getQueueCount()}</div></Anim>
+            <Anim><div class="queue-count">Players in queue: 0</div></Anim>
             <Anim><div class="player-count">Players in game: NaNeInf</div></Anim>
         </div>
     </Intr>
