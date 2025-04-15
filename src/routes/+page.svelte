@@ -2,6 +2,7 @@
     import Logo from '$lib/Discord-Logo-White.png';
     import Animated from '$lib/components/animated.svelte';
     import Interactable from '$lib/components/interactable.svelte';
+    import { authState, login, logout } from '$lib/supabaseClient.svelte';
 </script>
 
 <Animated><Interactable colorIndex={5} grow={false} padding={false}>
@@ -13,9 +14,15 @@
             <Interactable colorIndex={3} href='/stats'>My stats</Interactable>
         </Animated>
         <Animated>
-            <Interactable colorIndex={4} href='/login'>
+            {#if authState.session == null}
+            <Interactable colorIndex={4} callback={login}>
                 Connect with &nbsp <img src={Logo} alt="Discord">
             </Interactable>
+            {:else}
+            <Interactable callback={logout}>
+                Hello {authState.displayName}
+            </Interactable>
+            {/if}
     </Animated>
     </div>
 </Interactable></Animated>
