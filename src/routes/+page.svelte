@@ -13,7 +13,9 @@
             <Interactable colorIndex={3} href='/stats'>My stats</Interactable>
         </Animated>
         <Animated>
-            <Interactable colorIndex={4} href='/login'>Login</Interactable>
+            <Interactable colorIndex={4} href='/login'>
+                Connect with &nbsp <img src={Logo} alt="Discord">
+            </Interactable>
     </Animated>
     </div>
 </Interactable></Animated>
