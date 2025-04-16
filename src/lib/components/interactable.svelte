@@ -1,22 +1,22 @@
 <script lang="ts">
-    let { children, colorIndex = 1, grow = true, padding = true, href='', callback = undefined } = $props();
+    let { children, colorIndex = 1, grow = true, padding = true, href='', callback = undefined, className = '' } = $props();
 
-    let className = $derived(grow ? 'grow' : '');
+    let derivedClass = $derived(`${grow ? 'grow' : ''} ${className}`);
     let pd = $derived(padding ? 'padding: 1rem 3rem;' : '')
     let bg = $derived(`background-color: var(--clr-pallete-${colorIndex});`);
     let style = $derived(`${bg} ${pd}`);
 </script>
 
 {#if href !== ''}
-<a href={href} class={className} style={style}>
+<a href={href} class={derivedClass} style={style}>
     {@render children?.()}
 </a>
 {:else if callback != undefined}
-<button class={className} style={style} onclick={callback}>
+<button class={derivedClass} style={style} onclick={callback}>
     {@render children?.()}
 </button>
 {:else}
-<div class={className} style={style + 'cursor: default;'}>
+<div class={derivedClass} style={style + 'cursor: default;'}>
     {@render children?.()}
 </div>
 {/if}
