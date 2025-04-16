@@ -4,9 +4,12 @@
     import { onMount } from "svelte";
     let { data } = $props();
 
+    const roomIndex = ['casual', 'standard', 'ranked', 'custom']
+    let colorIndex = roomIndex.indexOf(data.roomID) + 1;
+
     onMount(() =>{
-        
+
     });
 </script>
 
-<Anim><Intr colorIndex={1}>{data.roomID}</Intr></Anim>
+<Anim style={`view-transition-name: ${data.roomID};`}><Intr colorIndex={colorIndex}>{data.roomID}</Intr></Anim>

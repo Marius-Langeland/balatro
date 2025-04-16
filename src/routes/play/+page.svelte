@@ -1,25 +1,20 @@
 <script lang="ts">
     import Anim from "$lib/components/animated.svelte";
     import Intr from "$lib/components/interactable.svelte";
+
+    const roomIndex = ['casual', 'standard', 'ranked', 'custom']
     
     let mode = $state(0);
-    let room = $derived.by(() => {
-        switch(mode){
-            case 0 : return 'casual';
-            case 1 : return 'standard';
-            case 2 : return 'ranked';
-            case 3 : return 'yokd';
-        }
-    });
-
+    let room = $derived(roomIndex[mode]);
 </script>
 
 <div class='grid'>
     <div id="mode">
-        <Anim><Intr callback={() => mode = 0} colorIndex={mode == 0 ? 1 : 0}>Casual</Intr></Anim>
-        <Anim><Intr callback={() => mode = 1} colorIndex={mode == 1 ? 2 : 0}>Standard</Intr></Anim>
-        <Anim><Intr callback={() => mode = 2} colorIndex={mode == 2 ? 3 : 0}>Ranked</Intr></Anim>
-        <Anim><Intr callback={() => mode = 3} colorIndex={mode == 3 ? 4 : 0}>Yökd</Intr></Anim>
+        {#each roomIndex as room, i}
+            <Anim style={`view-transition-name: ${room};`}>
+                <Intr callback={() => mode = i} colorIndex={mode == i ? i + 1 : 0}>{room}</Intr>
+            </Anim>
+        {/each}
     </div>
 
     <Intr colorIndex={5} grow={false}>

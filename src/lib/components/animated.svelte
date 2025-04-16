@@ -1,12 +1,12 @@
 <script lang="ts">
-    let { children, className = '' } = $props();
+    let { children, className = '', style = '' } = $props();
     const lerp = (x : number, y : number, a : number) => x * (1 - a) + y * a;
 
     let speedR = $state(lerp(3, 5, Math.random()));
     let speedT = $state(lerp(3, 5, Math.random()));
 </script>
 
-<div class={className} style={`animation-duration: ${speedR}s, ${speedT}s;`}>
+<div class={className} style={`animation-duration: ${speedR}s, ${speedT}s; ${style}`}>
     {@render children?.()}
 </div>
 
