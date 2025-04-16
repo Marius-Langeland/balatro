@@ -1,9 +1,16 @@
 <script lang="ts">
     import Anim from "$lib/components/animated.svelte";
     import Intr from "$lib/components/interactable.svelte";
-    import { onMount } from "svelte";
     
     let mode = $state(0);
+    let room = $derived.by(() => {
+        switch(mode){
+            case 0 : return 'casual';
+            case 1 : return 'standard';
+            case 2 : return 'ranked';
+            case 3 : return 'yokd';
+        }
+    });
 
 </script>
 
@@ -17,11 +24,8 @@
 
     <Intr colorIndex={5} grow={false}>
         <div id="queue-info">
-            {#if true }
-                <Anim><Intr colorIndex={2}>Search for match</Intr></Anim>
-            {:else}
-                <Anim><Intr colorIndex={3}>Stop search</Intr></Anim>
-            {/if}
+            <Anim><Intr href={`queue/${room}`} colorIndex={2}>Search for match</Intr></Anim>
+
             <Anim><div class="queue-count">Players in queue: 0</div></Anim>
             <Anim><div class="player-count">Players in game: NaNeInf</div></Anim>
         </div>
