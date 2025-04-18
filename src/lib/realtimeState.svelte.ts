@@ -1,20 +1,34 @@
-import type { RealtimeChannel, RealtimePresenceJoinPayload, RealtimePresenceLeavePayload, RealtimePresenceState } from "@supabase/supabase-js"
+import { authState } from "$lib/supabaseClient.svelte.js";
+import type { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-js"
 
-let presences : any = $state.raw({
-    
-});
-
-export const getPresencesState = () => presences;
 
 export const sync = (room: RealtimeChannel) => {
-    console.log(room.presenceState())
-    return room.presenceState();
+    let payload: RealtimePresenceState = room.presenceState();
+    //let keys : any = Object.keys(payload);
+    //return payload[keys[0]];
+    return payload;
 }
 
-export const join = ({key, newPresences} : {key : string, newPresences : RealtimePresenceJoinPayload<any>}) => {
-
+const userStatus = {
+    user: authState.session == null ? 'Guest' : authState.displayName,
+    matched: false,
 }
 
-export const leave = ({key, newPresences} : {key : string, newPresences : RealtimePresenceLeavePayload<any>}) => {
+const presence: { state: RealtimePresenceState } = $state({ state: {} });
+const presenceDerived : any = $derived(Object.values(presence.state));
+export const presenceUsers = () => presenceDerived;
 
+export function subscribe(channel: RealtimeChannel) {
+    channel
+        .on(
+            "broadcast",
+            { event: "shout" },
+            (payload) => console.log(payload),
+        )
+        .on('presence', { event: 'sync' }, () => { presence.state = sync(channel) })
+        .subscribe(async (status) => {
+            if (status !== 'SUBSCRIBED') return;
+
+            const presenceTrackStatus = await channel.track(userStatus);
+        });
 }
