@@ -32,3 +32,7 @@ export function subscribe(channel: RealtimeChannel) {
         )
         .on('presence', { event: 'sync' }, () => { presence.state = sync(channel) });
 }
+
+let matchID: number | null = $state(null);
+export function saveMatch(id: number | null) { matchID = id; }
+export const getMatch = () => matchID;

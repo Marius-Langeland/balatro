@@ -1,21 +1,38 @@
 <script lang="ts">
     import Anim from "$lib/components/animated.svelte";
     import Intr from "$lib/components/interactable.svelte";
-    import { supabase } from "$lib/supabaseClient.svelte.js";
+    import { authState, supabase } from "$lib/supabaseClient.svelte.js";
     import { onMount } from "svelte";
-    import { presenceUsers, subscribe } from "$lib/realtimeState.svelte.js";
-    import { fly, slide } from "svelte/transition";
+    import { getMatch, presenceUsers, saveMatch } from "$lib/realtimeState.svelte.js";
+    import { slide } from "svelte/transition";
     
     let { data } = $props();
+    let match = getMatch();
 
     const roomIndex = ["casual", "standard", "ranked", "custom"];
     let colorIndex = roomIndex.indexOf(data.roomID) + 1;
 
     onMount(() => {
         const channel = supabase.channel(data.roomID);
-        subscribe(channel);
+        channel
+        .on(
+            'postgres_changes',
+            {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'Queue',
+            },
+            (payload) => {
+                const newRecord = payload.new;
+                saveMatch(newRecord.match_found);
+            }
+        )
+        .subscribe();
+
+        supabase.from('Queue').insert([{ queue_mode: data.roomID }]);
 
         return async () => {
+            await supabase.from('Queue').delete().eq('user_id', authState.session?.user.id);
             await channel.untrack();
             channel.unsubscribe();
         }
@@ -25,6 +42,12 @@
 <Anim style={`view-transition-name: ${data.roomID};`}>
     <Intr {colorIndex}>{data.roomID}</Intr>
 </Anim>
+
+{#if match != null}
+<div>
+    <Anim><Intr href="match/${match}">Match found! Click enter.</Intr></Anim>
+</div>
+{/if}
 
 <Intr colorIndex={5} grow={false} padding={false}>
     <div class="player-display">
