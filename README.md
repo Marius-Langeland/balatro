@@ -1,1 +1,1 @@
-# (Currently?) non-functional matchmaking middle-man for the Balatro multiplayer mod
+# Semi-functional matchmaking middle-man for the Balatro multiplayer mod
