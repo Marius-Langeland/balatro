@@ -7,15 +7,15 @@
     import { slide } from "svelte/transition";
     
     let { data } = $props();
-    let match = getMatch();
+    let match = $derived(getMatch());
 
     let roomID = data.roomID;
-    const channel = supabase.channel(roomID);
 
     const roomIndex = ["casual", "standard", "ranked", "custom"];
     let colorIndex = roomIndex.indexOf(data.roomID) + 1;
 
     onMount(async () => {
+        const channel = supabase.channel(roomID);
         channel
         .on(
             'postgres_changes',
@@ -45,8 +45,8 @@
         if(error) console.log(error);
         else console.log(data);
         
-        await channel.untrack();
-        await channel.unsubscribe();
+        //await channel.untrack();
+        //await channel.unsubscribe();
     });
 </script>
 
@@ -56,7 +56,7 @@
 
 {#if match != null}
 <div>
-    <Anim><Intr href="match/${match}">Match found! Click enter.</Intr></Anim>
+    <Anim><Intr href="/match">Match found! Click enter.</Intr></Anim>
 </div>
 {/if}
 
