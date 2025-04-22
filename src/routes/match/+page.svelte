@@ -1,19 +1,16 @@
 <script lang="ts">
      import { page } from '$app/state';
     import Interactable from '$lib/components/interactable.svelte';
+    import { getMatch, queryMatch } from '$lib/realtimeState.svelte';
     import { authState, supabase } from "$lib/supabaseClient.svelte.js";
     import { onMount } from "svelte";
     import { slide } from 'svelte/transition';
 
-    let match_id = $derived(page.params.matchid);
-    let match : any = $state.raw({});
+    let match : any = $derived(getMatch());
     let users : any = $state([]);
 
     onMount(async () => {
-        const { data, error } = await supabase.from('Match').select('*').eq('concluded', false).limit(1);
-        
-        if(error) console.log(error);
-        else match = data[0];
+        await queryMatch();
 
         for (let index = 0; index < 2; index++) {
             const { data: userData, error : userError } = await supabase.rpc('get_user', { user_uuid: match.players[index] });
@@ -28,14 +25,14 @@
     })
 </script>
 
-<Interactable>Match {match.id}</Interactable>
+<Interactable>Match {match?.id ?? 'not found'}</Interactable>
 
 <Interactable colorIndex={5} padding={false} grow={false}>
     <div class="players">
         {#each users as user}
             <div transition:slide class="user">
                 {#if user.picture != null}
-                <img src={user.picture}>
+                <img src={user.picture} alt="">
                 {:else}
                 <div class="no-picture"></div>
                 {/if}
@@ -57,14 +54,13 @@
         align-items: center;
         justify-content: start;
         gap: 1rem;
-        background-color: rgba(0, 0, 0, 0.172);
+        background-color: rgba(0, 0, 0, 0.2);
         padding: 1rem;
     }
     img, .no-picture{
         height: 5ch;
-        background-color: var(--clr-pallete-0);
         border-radius: 50%;
         aspect-ratio: 1;
-        display: flex;
     }
+    .no-picture{background-color: var(--clr-pallete-0);}
 </style>

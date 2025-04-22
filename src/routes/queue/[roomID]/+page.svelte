@@ -3,7 +3,7 @@
     import Intr from "$lib/components/interactable.svelte";
     import { authState, supabase } from "$lib/supabaseClient.svelte.js";
     import { onDestroy, onMount } from "svelte";
-    import { getMatch, presenceUsers, saveMatch } from "$lib/realtimeState.svelte.js";
+    import { getMatch, listenForMatch, presenceUsers } from "$lib/realtimeState.svelte.js";
     import { slide } from "svelte/transition";
     
     let { data } = $props();
@@ -16,22 +16,7 @@
 
     onMount(async () => {
         const channel = supabase.channel(roomID);
-        channel
-        .on(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'Match',
-                filter: 'concluded=neq.true',
-            },
-            (payload: any) => {
-                const newRecord = payload.new;
-                saveMatch(newRecord.id);
-                console.log(newRecord.id);
-            }
-        )
-        .subscribe();
+        listenForMatch(channel);
         
         const {data : insertData, error : insertError} = await supabase.from('Queue').insert([{ queue_mode: roomID }]);
 
@@ -44,9 +29,6 @@
         const {data, error} = await supabase.from('Queue').delete().eq('user_id', authState.session?.user.id);
         if(error) console.log(error);
         else console.log(data);
-        
-        //await channel.untrack();
-        //await channel.unsubscribe();
     });
 </script>
 
@@ -54,23 +36,33 @@
     <Intr {colorIndex}>{data.roomID}</Intr>
 </Anim>
 
-{#if match != null}
-<div>
-    <Anim><Intr href="/match">Match found! Click enter.</Intr></Anim>
-</div>
-{/if}
+<div class="content">
+    {#if match != null}
+    <div transition:slide>
+        <Anim><Intr href="/match">Match found! Click to enter.</Intr></Anim>
+    </div>
+    {/if}
 
-<Intr colorIndex={5} grow={false} padding={false}>
-    <div class="player-display">
-        {#each presenceUsers() as p}
+    <Anim>
+    <Intr colorIndex={5} grow={false} padding={false}>
+        <div class="player-display">
+            {#each presenceUsers() as p}
             <div transition:slide class="player">
                 <span class="name">{p[0].user}</span>
             </div>
-        {/each}
-    </div>
-</Intr>
+            {/each}
+        </div>
+    </Intr>
+    </Anim>
+</div>
 
 <style>
+    .content{
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
     .player-display{
         display: flex;
         flex-direction: column;

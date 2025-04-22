@@ -2,6 +2,8 @@
     import { onNavigate } from '$app/navigation';
     import Anim from '$lib/components/animated.svelte';
     import Intr from '$lib/components/interactable.svelte';
+    import { queryMatch } from '$lib/realtimeState.svelte';
+    import { onMount } from 'svelte';
     let { children } = $props();
 
     onNavigate(async (navigation) => {
@@ -13,6 +15,10 @@
     			await navigation.complete;
     		});
     	});
+    });
+
+    onMount(async () => {
+        await queryMatch();
     });
 </script>
 

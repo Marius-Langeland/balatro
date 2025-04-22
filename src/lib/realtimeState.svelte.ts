@@ -1,5 +1,6 @@
 import { authState } from "$lib/supabaseClient.svelte.js";
 import type { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-js"
+import { supabase } from "$lib/supabaseClient.svelte.js";
 
 
 export const sync = (room: RealtimeChannel) => {
@@ -33,6 +34,31 @@ export function subscribe(channel: RealtimeChannel) {
         .on('presence', { event: 'sync' }, () => { presence.state = sync(channel) });
 }
 
-let matchID: number | null = $state(null);
-export function saveMatch(id: number | null) { matchID = id; }
-export const getMatch = () => matchID;
+let match: any = $state.raw(null);
+function saveMatch(payload : any) { match = payload; }
+export const getMatch = () => match;
+export async function queryMatch() {
+    const { data, error } = await supabase.from('Match').select('*').eq('concluded', false).limit(1);
+    
+    if(error) console.log(error);
+    else saveMatch(data[0]);
+}
+
+export function listenForMatch(channel : RealtimeChannel){
+    channel
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'Match',
+                filter: 'concluded=eq.false',
+            },
+            (payload: any) => {
+                const newRecord = payload.new;
+                saveMatch(newRecord);
+                console.log(newRecord);
+            }
+        )
+        .subscribe();
+}
