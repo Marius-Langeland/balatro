@@ -2,41 +2,52 @@
     import Anim from "$lib/components/animated.svelte";
     import Intr from "$lib/components/interactable.svelte";
     import { authState, supabase } from "$lib/supabaseClient.svelte.js";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import { getMatch, presenceUsers, saveMatch } from "$lib/realtimeState.svelte.js";
     import { slide } from "svelte/transition";
     
     let { data } = $props();
     let match = getMatch();
 
+    let roomID = data.roomID;
+    const channel = supabase.channel(roomID);
+
     const roomIndex = ["casual", "standard", "ranked", "custom"];
     let colorIndex = roomIndex.indexOf(data.roomID) + 1;
 
-    onMount(() => {
-        const channel = supabase.channel(data.roomID);
+    onMount(async () => {
         channel
         .on(
             'postgres_changes',
             {
-                event: 'UPDATE',
+                event: '*',
                 schema: 'public',
-                table: 'Queue',
+                table: 'Match',
+                filter: 'concluded=neq.true',
             },
-            (payload) => {
+            (payload: any) => {
                 const newRecord = payload.new;
-                saveMatch(newRecord.match_found);
+                saveMatch(newRecord.id);
+                console.log(newRecord.id);
             }
         )
         .subscribe();
+        
+        const {data : insertData, error : insertError} = await supabase.from('Queue').insert([{ queue_mode: roomID }]);
 
-        supabase.from('Queue').insert([{ queue_mode: data.roomID }]);
+        if(insertError)
+            console.log('Insert error:', insertError);
+        else console.log('Inserted data:', insertData);
+    });
 
-        return async () => {
-            await supabase.from('Queue').delete().eq('user_id', authState.session?.user.id);
-            await channel.untrack();
-            channel.unsubscribe();
-        }
-    })
+    onDestroy(async () => {
+        const {data, error} = await supabase.from('Queue').delete().eq('user_id', authState.session?.user.id);
+        if(error) console.log(error);
+        else console.log(data);
+        
+        await channel.untrack();
+        await channel.unsubscribe();
+    });
 </script>
 
 <Anim style={`view-transition-name: ${data.roomID};`}>
