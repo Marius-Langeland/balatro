@@ -8,6 +8,7 @@
     
     let { data } = $props();
     let match = $derived(getMatch());
+    let waiting_room = $state(false);
 
     let roomID = data.roomID;
 
@@ -32,25 +33,33 @@
     });
 </script>
 
-<Anim style={`view-transition-name: ${data.roomID};`}>
-    <Intr {colorIndex}>{data.roomID}</Intr>
-</Anim>
-
 <div class="content">
-    {#if match != null}
-    <div transition:slide>
-        <Anim><Intr href="/match">Match found! Click to enter.</Intr></Anim>
+    <div class="mode">
+        <Anim style={`view-transition-name: ${data.roomID};`}>
+            <Intr {colorIndex}>{data.roomID}</Intr>
+        </Anim>
+        {#if match != null}
+        <div transition:slide>
+            <Anim><Intr colorIndex={3} href="/match">Match found! Click to enter.</Intr></Anim>
+        </div>
+        {/if}
     </div>
-    {/if}
 
     <Anim>
     <Intr colorIndex={5} grow={false} padding={false}>
-        <div class="player-display">
-            {#each presenceUsers() as p}
-            <div transition:slide class="player">
-                <span class="name">{p[0].user}</span>
-            </div>
-            {/each}
+        <div class={`player-display ${waiting_room ? '' : 'disabled'}`}>
+            {#if waiting_room}
+                <div transition:slide class="toolbar">
+                    <span>Waiting room</span>
+                </div>
+                {#each presenceUsers() as p}
+                <div transition:slide class="player">
+                    <span class="name">{p[0].user}</span>
+                </div>
+                {/each}
+            {:else}
+            <Anim><Intr callback={() => waiting_room = !waiting_room} colorIndex={0}>Join waiting room</Intr></Anim>
+            {/if}
         </div>
     </Intr>
     </Anim>
@@ -63,12 +72,28 @@
         gap: 1rem;
     }
 
+    .mode{
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 1rem;
+    }
+
     .player-display{
         display: flex;
         flex-direction: column;
         gap: 2px;
         min-width: 30vw;
         min-height: 30vh;
+    }
+
+    .disabled{
+        align-items: center;
+        justify-content: center;
+    }
+
+    .toolbar{
+        background-color: rgba(0, 0, 0, 0.453);
     }
 
     .player{
