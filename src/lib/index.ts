@@ -39,25 +39,25 @@ export type Database = {
           concluded: boolean
           created_at: string
           id: number
-          players: string[] | null
+          players: string[]
           queue_mode: string
-          score: number[] | null
+          score: number[]
         }
         Insert: {
           concluded?: boolean
           created_at?: string
           id?: number
-          players?: string[] | null
+          players: string[]
           queue_mode?: string
-          score?: number[] | null
+          score: number[]
         }
         Update: {
           concluded?: boolean
           created_at?: string
           id?: number
-          players?: string[] | null
+          players?: string[]
           queue_mode?: string
-          score?: number[] | null
+          score?: number[]
         }
         Relationships: []
       }
