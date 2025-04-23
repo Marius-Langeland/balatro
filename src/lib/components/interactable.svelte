@@ -1,7 +1,7 @@
 <script lang="ts">
     let { children, colorIndex = 1, grow = true, padding = true, href='', callback = undefined } = $props();
 
-    let className = $derived(grow ? 'grow' : '');
+    let className = $derived(grow ? 'grow panel' : 'panel');
     let pd = $derived(padding ? 'padding: 1rem 3rem;' : '')
     let bg = $derived(`background-color: var(--clr-pallete-${colorIndex});`);
     let style = $derived(`${bg} ${pd}`);
@@ -27,16 +27,20 @@
     button, a, div{
         user-select: none;
         cursor: pointer;
-        border-radius: .75rem;
-        box-shadow: 0 8px 0 -2px rgb(37, 37, 37);
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         overflow: hidden;
         transition: scale .2s ease, background-color .2s ease;
-
+        box-shadow: 0 8px 0 -2px rgb(37, 37, 37);
+        border-radius: .75rem;
         text-shadow: 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    :global(.panel){
+        box-shadow: 0 8px 0 -2px rgb(37, 37, 37);
+        border-radius: .75rem;
     }
 
     .grow:hover, .grow:focus{
