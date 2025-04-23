@@ -1,6 +1,6 @@
 <script lang="ts">
      import { page } from '$app/state';
-    import { type DeckArray, type DeckData, deck_list } from '$lib/balatro.svelte';
+    import { deck_list } from '$lib/balatro.svelte';
     import Deck from '$lib/components/deck.svelte';
     import Interactable from '$lib/components/interactable.svelte';
     import { getMatch, queryMatch } from '$lib/realtimeState.svelte';
@@ -8,9 +8,15 @@
     import { onMount } from "svelte";
     import { slide } from 'svelte/transition';
 
-    let bans : DeckArray = $state({});
+    let bans : number[] = $state([]);
     let match : any = $derived(getMatch());
     let users : any = $state([]);
+
+    function toggleBan(index : number){
+        if(bans.includes(index))
+            bans.splice(bans.indexOf(index), 1);
+        else if(bans.length < 3) bans.push(index);
+    }
 
     onMount(async () => {
         await queryMatch();
@@ -54,19 +60,33 @@
     </div>
 
     <div class="ban panel">
-        {#each Object.entries(deck_list) as [deckName, deckData]}
-            <div class="deck-container">
+        <div class="title">Ban decks ({bans.length}/3)</div>
+        {#each Object.entries(deck_list) as [deckName, deckData], index}
+            <button class={`deck-container${bans.includes(index) ? ' banned' : ''}`}
+                onclick={() => toggleBan(index)}>
                 <div class="deck-data">
                     <span>{deckName}</span>
                     <span>{deckData.description}</span>
                 </div>
                 <Deck deck={deckData} />
-            </div>
+            </button>
         {/each}
     </div>
 </div>
 
 <style>
+    button{
+        all:unset;
+    }
+    .title{
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        user-select: none;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        backdrop-filter: blur(10px);
+    }
     .ban{
         grid-column: 1/-1;
         display: flex;
@@ -76,18 +96,18 @@
         max-height: 30vh;
         max-width: 50vw;
         justify-content: center;
-        padding: 1rem;
-        border: .5rem solid rgba(0, 0, 0, 0.2);
         overflow-y: scroll;
+        scrollbar-width: none;
+        padding-bottom: 1rem;
     }
 
     .deck-container{
+        cursor: pointer;
         position: relative;
+        transition: opacity .3s ease, scale .3s ease;
 
         & .deck-data{
-            & *:nth-child(1){
-                font-size: 1.6rem;
-            }
+            text-transform: none !important;
             position: absolute;
             z-index: 1;
             background-color: rgba(19, 23, 31, 0.926);
@@ -105,9 +125,17 @@
             opacity: 0;
             transition: opacity .3s ease;
         }
+        & .deck-data *:nth-child(1){
+            font-size: 1.6rem;
+        }
         &:hover .deck-data{
             opacity: 100%;
         }
+    }
+
+    .banned{
+        opacity: 30%;
+        scale: 94%;
     }
 
     .content{
@@ -128,13 +156,13 @@
         & .messages{
             display: flex;
             justify-content: center;
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: rgba(0, 0, 0, 0.8);
         }
 
         & input{
             font-size: medium;
             padding: .5rem .75rem;
-            background-color: var(--clr-pallete-3);
+            background-color: rgba(255, 255, 255, 0.8);
             border: unset;
             box-shadow: 0 0 2rem rgba(0, 0, 0, 0.5);
             outline: none;
