@@ -40,7 +40,7 @@
     <Interactable colorIndex={5} padding={false} grow={false}>
         <div class="players">
             {#each users as user}
-                <div transition:slide class="user">
+                <div class="user">
                     {#if user.picture != null}
                     <img src={user.picture} alt="">
                     {:else}
@@ -93,7 +93,7 @@
         flex-wrap: wrap;
         gap: 1rem;
         background-color: var(--clr-pallete-5);
-        max-height: 30vh;
+        max-height: 50vh;
         max-width: 50vw;
         justify-content: center;
         overflow-y: scroll;
@@ -134,7 +134,7 @@
     }
 
     .banned{
-        opacity: 30%;
+        opacity: 10%;
         scale: 94%;
     }
 
