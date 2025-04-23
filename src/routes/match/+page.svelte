@@ -66,7 +66,7 @@
                 onclick={() => toggleBan(index)}>
                 <div class="deck-data">
                     <span>{deckName}</span>
-                    <span>{deckData.description}</span>
+                    <span>{@html deckData.description}</span>
                 </div>
                 <Deck deck={deckData} />
             </button>
