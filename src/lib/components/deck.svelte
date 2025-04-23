@@ -23,7 +23,7 @@
 
 <style>
     .card{
-        width: 110px;
+        width: 143px;
         aspect-ratio: 3/4;
         overflow: hidden;
     }
