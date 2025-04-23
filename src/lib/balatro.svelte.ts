@@ -71,7 +71,7 @@ export const deck_list : DeckArray = {
     },
     'Anaglyph deck': {
         description: 'After defeating each Boss Blind: <br/> gain a Double Tag',
-        x: 3,
+        x: 2,
         y: 4,
     },
     'Plasma deck': {
