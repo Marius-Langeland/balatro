@@ -3,7 +3,7 @@
     import Intr from "$lib/components/interactable.svelte";
     import { authState, supabase } from "$lib/supabaseClient.svelte.js";
     import { onDestroy, onMount } from "svelte";
-    import { getMatch, listenForMatch, presenceUsers } from "$lib/realtimeState.svelte.js";
+    import { getMatch, listenForMatch } from "$lib/realtimeState.svelte.js";
     import { slide } from "svelte/transition";
     
     let { data } = $props();
@@ -52,13 +52,8 @@
                 <div transition:slide class="toolbar">
                     <span>Waiting room</span>
                 </div>
-                {#each presenceUsers() as p}
-                <div transition:slide class="player">
-                    <span class="name">{p[0].user}</span>
-                </div>
-                {/each}
             {:else}
-            <Anim><Intr callback={() => waiting_room = !waiting_room} colorIndex={0}>Join waiting room</Intr></Anim>
+                <Anim><Intr callback={() => waiting_room = !waiting_room} colorIndex={0}>Join waiting room</Intr></Anim>
             {/if}
         </div>
     </Intr>

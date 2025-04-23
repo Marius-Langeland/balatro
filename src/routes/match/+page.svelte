@@ -1,12 +1,10 @@
 <script lang="ts">
-     import { page } from '$app/state';
     import { deck_list } from '$lib/balatro.svelte';
     import Deck from '$lib/components/deck.svelte';
     import Interactable from '$lib/components/interactable.svelte';
-    import { getMatch, queryMatch } from '$lib/realtimeState.svelte';
+    import { getMatch, queryMatch, trackBans } from '$lib/realtimeState.svelte';
     import { authState, supabase } from "$lib/supabaseClient.svelte.js";
     import { onMount } from "svelte";
-    import { slide } from 'svelte/transition';
 
     let bans : number[] = $state([]);
     let match : any = $derived(getMatch());
@@ -17,6 +15,10 @@
             bans.splice(bans.indexOf(index), 1);
         else if(bans.length < 3) bans.push(index);
     }
+
+    $effect(() => {
+        trackBans(match.players, bans);
+    })
 
     onMount(async () => {
         await queryMatch();
