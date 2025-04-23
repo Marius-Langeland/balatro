@@ -77,7 +77,7 @@ export const deck_list : DeckArray = {
     'Plasma deck': {
         description: 'Balance Chips and Mult when calculating score for played hand <br/> X2 base Blind size',
         x: 4,
-        y: 3,
+        y: 2,
     },
     'Erratic deck': {
         description: 'All Ranks and Suits in deck are randomized',
