@@ -1,11 +1,14 @@
 <script lang="ts">
      import { page } from '$app/state';
+    import { type DeckArray, type DeckData, deck_list } from '$lib/balatro.svelte';
+    import Deck from '$lib/components/deck.svelte';
     import Interactable from '$lib/components/interactable.svelte';
     import { getMatch, queryMatch } from '$lib/realtimeState.svelte';
     import { authState, supabase } from "$lib/supabaseClient.svelte.js";
     import { onMount } from "svelte";
     import { slide } from 'svelte/transition';
 
+    let bans : DeckArray = $state({});
     let match : any = $derived(getMatch());
     let users : any = $state([]);
 
@@ -49,13 +52,68 @@
         </div>
         <input type="text" placeholder="Send a message">
     </div>
+
+    <div class="ban panel">
+        {#each Object.entries(deck_list) as [deckName, deckData]}
+            <div class="deck-container">
+                <div class="deck-data">
+                    <span>{deckName}</span>
+                    <span>{deckData.description}</span>
+                </div>
+                <Deck deck={deckData} />
+            </div>
+        {/each}
+    </div>
 </div>
 
 <style>
+    .ban{
+        grid-column: 1/-1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background-color: var(--clr-pallete-5);
+        max-height: 30vh;
+        max-width: 50vw;
+        justify-content: center;
+        padding: 1rem;
+        border: .5rem solid rgba(0, 0, 0, 0.2);
+        overflow-y: scroll;
+    }
+
+    .deck-container{
+        position: relative;
+
+        & .deck-data{
+            & *:nth-child(1){
+                font-size: 1.6rem;
+            }
+            position: absolute;
+            z-index: 1;
+            background-color: rgba(19, 23, 31, 0.926);
+            font-size: medium;
+            display: flex;
+            flex-direction: column;
+            top: 50%;
+            left: 50%;
+            translate: -50% -50%;
+            width: max-content;
+            padding: 1rem;
+            pointer-events: none;
+            border-radius: .5rem;
+
+            opacity: 0;
+            transition: opacity .3s ease;
+        }
+        &:hover .deck-data{
+            opacity: 100%;
+        }
+    }
+
     .content{
         display: grid;
         gap: 1rem;
-        grid-template-columns: 2fr 3fr;
+        grid-template-columns: auto 1fr;
     }
 
     .chat{

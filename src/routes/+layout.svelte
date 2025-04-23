@@ -1,10 +1,12 @@
 <script>
     import { onNavigate } from '$app/navigation';
     import Anim from '$lib/components/animated.svelte';
+    import Deck from '$lib/components/deck.svelte';
     import Intr from '$lib/components/interactable.svelte';
     import { queryMatch } from '$lib/realtimeState.svelte';
     import { onMount } from 'svelte';
     let { children } = $props();
+    import { deck_list } from '$lib/balatro.svelte';
 
     onNavigate(async (navigation) => {
     	if (!document.startViewTransition) return;
@@ -53,12 +55,11 @@
 
     main{
         display: flex;
-        justify-content: center;
+        justify-content: space-evenly;
         align-items: center;
         flex-direction: column;
         height: 100vh;
-        width: 100vw;
-        gap: 10%;
+        max-width: 100vw;
         font-size: calc(1vw + 1rem);
         text-transform: uppercase;
 
