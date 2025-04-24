@@ -1,7 +1,7 @@
 <script lang="ts">
     import Deck from "./deck.svelte";
     import { deck_list } from "$lib/balatro.svelte";
-    import { fade, slide } from "svelte/transition";
+    import { slide } from "svelte/transition";
 
     let { bans } : { bans: number[] } = $props();
     let decks = $derived.by(() => {

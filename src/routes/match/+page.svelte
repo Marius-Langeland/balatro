@@ -1,12 +1,8 @@
 <script lang="ts">
-    import { deck_list } from '$lib/balatro.svelte';
     import BanSheet from '$lib/components/ban_sheet.svelte';
     import BannedDecks from '$lib/components/banned-decks.svelte';
-    import Deck from '$lib/components/deck.svelte';
-    import Interactable from '$lib/components/interactable.svelte';
     import { getBansOther, getMatch, getUsers, joinMatchChannel, queryMatch, queryUsers } from '$lib/realtimeState.svelte';
     import { onMount } from "svelte";
-    import { slide } from 'svelte/transition';
 
     let bans : number[] = $state([]);
     let bansOther = $derived(getBansOther());

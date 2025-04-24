@@ -9,7 +9,7 @@
     let style = $derived(
         deck == null 
             ? ''
-            : `left: ${-deck.x * 100}%; top: ${-deck.y * 100.35}%;`
+            : `left: ${-deck.x * 100}%; top: ${-deck.y * 100.5}%;`
         );
 </script>
 
