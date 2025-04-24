@@ -84,4 +84,9 @@ export const deck_list : DeckArray = {
         x: 2,
         y: 3,
     },
+    'None' : {
+        description: 'None',
+        x: 4,
+        y: 0,
+    }
 }

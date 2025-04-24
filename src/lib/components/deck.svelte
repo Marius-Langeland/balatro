@@ -2,7 +2,7 @@
     import Enhancers from '$lib/Enhancers.png'
     import Animated from './animated.svelte';
     import Interactable from './interactable.svelte';
-    import type { DeckArray, DeckData } from '$lib/balatro.svelte';
+    import type { DeckData } from '$lib/balatro.svelte';
 
     let { deck = null } : { deck: DeckData | null } = $props();
 

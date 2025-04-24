@@ -1,12 +1,19 @@
-import type { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-js"
+import type { RealtimeChannel } from "@supabase/supabase-js"
 import { supabase } from "$lib/supabaseClient.svelte.js";
-import type { Tables } from "$lib";
+import type { Tables, Database } from "$lib";
+import { authState } from "$lib/supabaseClient.svelte.js";
 
+let channel: RealtimeChannel | null = $state(null);
 let match: Tables<'Match'> | null = $state.raw(null);
-let realtimeMatchState : RealtimePresenceState | null = $state.raw(null);
+let users : any = $state.raw([]);
+let banOther: number[] = $state([]);
+
+export const getBansOther = () => banOther;
+export const getMatch = () => match;
+export const getUsers = () => users;
+
 //#region Database query on Match table
 function saveMatch(payload : any) { match = payload; }
-export const getMatch = () => match;
 export async function queryMatch() {
     const { data, error } = await supabase.from('Match').select('*').eq('concluded', false).limit(1);
     
@@ -33,8 +40,7 @@ export function listenForMatch(channel : RealtimeChannel){
 }
 //#endregion
 
-$inspect(realtimeMatchState);
-//#region Realtime listen for match presence
+//#region Realtime listen for 
 const cyrb53 = (str: string, seed = 0) => {
     let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
     for(let i = 0, ch; i < str.length; i++) {
@@ -57,25 +63,48 @@ function getChannelHash(playerList: string[]) : string {
 
     return cyrb53(playerList[0] + playerList[1]);
 }
-export const getMatchState = () => realtimeMatchState;
-export function joinMatchChannel(playerList: string[]){
-    const topic = getChannelHash(playerList);
-    const channel = supabase.channel(topic);
 
-    channel.on('presence', {event: 'sync'}, () => {
-        realtimeMatchState = channel.presenceState();
-    })
-    .subscribe();
+function ban(payload: any){
+    console.log(payload);
 }
-//#endregion
+export function joinMatchChannel(){
+    if(match == null)
+        return;
+    
+    const topic = getChannelHash(match.players);
+    channel = supabase.channel(topic);
 
-export function trackBans(playerList: string[], bans: number[]){
-    const topic = getChannelHash(playerList);
-    const channel = supabase.channel(topic);
-    channel.subscribe(async (status) => {
-        if(status !== 'SUBSCRIBED') { return; }
+    channel
+    .on(
+      'broadcast',
+      { event: 'ban' },
+      (payload) => ban(payload)
+    ).subscribe();
+}
 
-        const presenceTrackStatus = await channel.track({ban_list: bans});
-        console.log(presenceTrackStatus);
-    });
+export function broadcastBans(bans: number[]){
+    if(match == null || channel == null)
+        return;
+
+    channel
+    .send({
+        type: 'broadcast',
+        event: 'ban',
+        payload: { bans: bans },
+    })
+    .then((response) => console.log(response, channel?.topic));
+}
+
+export async function queryUsers(match: Tables<'Match'>){
+    let u: Database['public']['Functions']['get_user']['Returns'][] = [];
+
+    for (let index = 0; index < 2; index++) {
+        let { data } : {data: any} = await supabase.rpc('get_user', { user_uuid: match.players[index] });
+        if(data.full_name == null)
+            data.full_name = (match.players[index] == authState.session?.user.id ? 'You' : 'Opponent');
+        
+        u.push(data);
+    }
+
+    users = u;
 }
