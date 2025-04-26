@@ -1,14 +1,19 @@
 <script lang="ts">
+    import Animated from '$lib/components/animated.svelte';
     import BanSheet from '$lib/components/ban_sheet.svelte';
     import BannedDecks from '$lib/components/banned-decks.svelte';
-    import { getBansOther, getMatch, getUsers, joinMatchChannel, queryMatch, queryUsers } from '$lib/realtimeState.svelte';
+    import Interactable from '$lib/components/interactable.svelte';
+    import User from '$lib/components/user.svelte';
+    import { getPresenceState as getPresenceState, getMatch, getUsers, joinMatchChannel, queryMatch, queryUsers } from '$lib/realtimeState.svelte';
     import { onMount } from "svelte";
+    import { bounceOut } from 'svelte/easing';
+    import { fly } from 'svelte/transition';
 
-    let bans : number[] = $state([]);
-    let bansOther = $derived(getBansOther());
+    let presenceState = $derived(getPresenceState());
     let match = $derived(getMatch());
     let users = $derived(getUsers());
-
+    $inspect(presenceState);
+    
     onMount(async () => {
         await queryMatch();
         joinMatchChannel();
@@ -19,33 +24,26 @@
 </script>
 
 <div class="content">
-    <div class="players panel">
+    <div class="players">
             {#each users as user}
-                <div class="user">
-                    {#if user?.picture != null}
-                    <img src={user?.picture} alt="">
-                    {:else}
-                    <div class="no-picture"></div>
-                    {/if}
-                    <span>{user.full_name}</span>
+                <div transition:fly={{x: 50, easing: bounceOut, opacity: 1}} class="user-info panel">
+                    <User user={user}/>
+                    <BannedDecks bans={presenceState[user.uuid] == undefined ? [] : presenceState[user.uuid][0].bans}/>
                 </div>
             {/each}
     </div>
 
-    <div class="chat panel">
-        <div class="messages">
-            <div>Chat</div>
-        </div>
-        <input type="text" placeholder="Send a message">
+    <div class="phase panel">
+        <Animated>
+            <Interactable colorIndex={3}>Ban phase</Interactable>
+        </Animated>
     </div>
 
     <div class="ban-sheet">
-        <BanSheet bans={bans}/>
+        <BanSheet/>
     </div>
 
-    <div class="banned-decks">
-        <BannedDecks bans={bansOther}/>
-        <BannedDecks bans={bans}/>
+    <div class="banned-deck other">
     </div>
 </div>
 
@@ -53,73 +51,44 @@
     .content{
         display: grid;
         gap: 1rem;
+        max-width: min(1200px, 50vw);
 
-        grid-template-columns: 26vw auto auto;
+        grid-template-columns: 1fr minmax(min-content, 400px);
 
-        grid-template-areas: 
-        "bs bd pl";
+        grid-template-areas:
+        "ph ph"
+        "bs pl";
     }
 
-    .chat{
-        grid-column: 2;
-        grid-row: 1 / 3;
-        display: none;
-        flex-direction: column;
-        justify-content: space-between;
-        overflow: hidden;
-        background-color: var(--clr-pallete-5);
-
-        & .messages{
-            display: flex;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-
-        & input{
-            font-size: medium;
-            padding: .5rem .75rem;
-            background-color: rgba(255, 255, 255, 0.8);
-            border: unset;
-            box-shadow: 0 0 2rem rgba(0, 0, 0, 0.5);
-            outline: none;
-            &::placeholder{color: rgba(0, 0, 0, 0.75);}
-        }
-    }
-
+    
     .ban-sheet{
         grid-area: bs;
     }
 
-    .banned-decks{
-        grid-area: bd;
-        display: flex;        
-        flex-direction: column;
-        justify-content: space-between;
+    .banned-deck{
+        align-self: center;
+
+        &:is(.other) {grid-area: p1;}
     }
 
     .players{
         display: flex;
-        flex-direction: column-reverse;
-        gap: 2px;
+        flex-direction: column;
+        gap: 1rem;
         grid-area: pl;
-        background-color: var(--clr-pallete-5);
-        overflow: hidden;
-        align-self: center;
-        
-        .user{
+
+        & .user-info{
             display: flex;
-            align-items: center;
-            justify-content: start;
-            gap: 1rem;
-            background-color: rgba(0, 0, 0, 0.2);
-            padding: 1rem;
-    
-            & img, .no-picture{
-                height: 5ch;
-                border-radius: 50%;
-                aspect-ratio: 1;
-            }
-            & .no-picture{background-color: var(--clr-pallete-0);}
+            flex-direction: column;
+            background-color: var(--clr-pallete-5);
+            padding: .5rem;
+            gap: .5rem;
+            align-items: start;
         }
+    }
+
+    .phase{
+        font-size: calc(1rem + 2vw);
+        grid-area: ph;
     }
 </style>

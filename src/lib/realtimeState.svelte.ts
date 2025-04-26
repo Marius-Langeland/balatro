@@ -1,18 +1,21 @@
-import type { RealtimeChannel } from "@supabase/supabase-js"
+import type { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-js"
 import { supabase } from "$lib/supabaseClient.svelte.js";
 import type { Tables, Database } from "$lib";
 import { authState } from "$lib/supabaseClient.svelte.js";
+import type { Bans } from "./balatro.svelte";
 
 let channel: RealtimeChannel | null = $state(null);
 let match: Tables<'Match'> | null = $state.raw(null);
 let users : any = $state.raw([]);
-let banOther: number[] = $state([]);
+let presenceState: RealtimePresenceState<{bans: number[]}> = $state({});
+let clientBans : number[] = $state([]);
 
-export const getBansOther = () => banOther;
+export const getPresenceState = () => presenceState;
+export const getClientBans = () => clientBans;
+export const setClientBans = (x: number[]) => {clientBans = x}
 export const getMatch = () => match;
 export const getUsers = () => users;
 
-//#region Database query on Match table
 function saveMatch(payload : any) { match = payload; }
 export async function queryMatch() {
     const { data, error } = await supabase.from('Match').select('*').eq('concluded', false).limit(1);
@@ -38,9 +41,7 @@ export function listenForMatch(channel : RealtimeChannel){
         )
         .subscribe();
 }
-//#endregion
 
-//#region Realtime listen for 
 const cyrb53 = (str: string, seed = 0) => {
     let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
     for(let i = 0, ch; i < str.length; i++) {
@@ -64,22 +65,41 @@ function getChannelHash(playerList: string[]) : string {
     return cyrb53(playerList[0] + playerList[1]);
 }
 
-function ban(payload: any){
-    console.log(payload);
-}
 export function joinMatchChannel(){
     if(match == null)
         return;
-    
+
     const topic = getChannelHash(match.players);
-    channel = supabase.channel(topic);
+    channel = supabase.channel(topic, {
+        config: {
+            broadcast: {self: true},
+            presence: {key: authState.session?.user.id},
+        }
+    });
+
+    console.log('topic', topic);
 
     channel
-    .on(
-      'broadcast',
-      { event: 'ban' },
-      (payload) => ban(payload)
-    ).subscribe();
+    .on('presence', { event: 'sync' }, () => {
+        if(channel == undefined)
+            return;
+
+        const newState = channel.presenceState<{bans: number[]}>();
+        presenceState = newState;
+    })
+    //.on('presence', { event: 'join' }, ({ key, newPresences }) => {
+    //    console.log('join', key, newPresences);
+    //})
+    //.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+    //    console.log('leave', key, leftPresences);
+    //})
+    .subscribe(async (status) => {
+        if(status !== 'SUBSCRIBED') return;
+
+        const trackStatus = await channel?.track({ bans: clientBans});
+        console.log(trackStatus);
+    });
+
 }
 
 export function broadcastBans(bans: number[]){
@@ -95,14 +115,20 @@ export function broadcastBans(bans: number[]){
     .then((response) => console.log(response, channel?.topic));
 }
 
+export async function updateBanStatePresence(bans: number[]){
+    channel?.track({bans: bans});
+}
+
 export async function queryUsers(match: Tables<'Match'>){
     let u: Database['public']['Functions']['get_user']['Returns'][] = [];
 
     for (let index = 0; index < 2; index++) {
-        let { data } : {data: any} = await supabase.rpc('get_user', { user_uuid: match.players[index] });
+        const uuid = match.players[index];
+        let { data } : {data: any} = await supabase.rpc('get_user', { user_uuid: uuid });
         if(data.full_name == null)
-            data.full_name = (match.players[index] == authState.session?.user.id ? 'You' : 'Opponent');
+            data.full_name = (uuid == authState.session?.user.id ? 'You' : 'Opponent');
         
+        data['uuid'] = uuid;
         u.push(data);
     }
 

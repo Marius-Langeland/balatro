@@ -2,6 +2,10 @@ export interface DeckArray {
     [key: string] : DeckData;
 }
 
+export interface Bans {
+    [key: string] : number[];
+}
+
 export interface DeckData{
     description: string,
     x: number,
@@ -86,6 +90,16 @@ export const deck_list : DeckArray = {
     },
     'None' : {
         description: 'None',
+        x: 4,
+        y: 0,
+    },
+    'Null' : {
+        description: 'Null',
+        x: 4,
+        y: 0,
+    },
+    'Empty' : {
+        description: 'Empty',
         x: 4,
         y: 0,
     }
