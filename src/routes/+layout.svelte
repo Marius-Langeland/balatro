@@ -1,12 +1,14 @@
 <script>
     import { onNavigate } from '$app/navigation';
     import Anim from '$lib/components/animated.svelte';
-    import Deck from '$lib/components/deck.svelte';
     import Intr from '$lib/components/interactable.svelte';
     import { queryMatch } from '$lib/realtimeState.svelte';
     import { onMount } from 'svelte';
+    
+    import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+    injectSpeedInsights();
+
     let { children } = $props();
-    import { deck_list } from '$lib/balatro.svelte';
 
     onNavigate(async (navigation) => {
     	if (!document.startViewTransition) return;
