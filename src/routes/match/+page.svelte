@@ -52,6 +52,7 @@
         display: grid;
         gap: 1rem;
         max-width: min(1200px, 50vw);
+        max-height: 80vh;
 
         grid-template-columns: 1fr minmax(min-content, 400px);
 
@@ -62,6 +63,7 @@
 
     
     .ban-sheet{
+        overflow: scroll;
         grid-area: bs;
     }
 
