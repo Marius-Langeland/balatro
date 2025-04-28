@@ -99,6 +99,10 @@ export function updateBanStatePresence(bans: number[]){
     state.bans = bans;
     channel?.track(state);
 }
+export function updatePickStatePresence(picks: number[]){
+    state.picks = picks;
+    channel?.track(state);
+}
 export function updateStatusStatePresence(phase: string){
     state.status = phase;
     channel?.track(state);

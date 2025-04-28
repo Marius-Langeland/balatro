@@ -1,6 +1,6 @@
 <script lang="ts">
     import { deck_list } from "$lib/balatro.svelte";
-    import { getPresenceState, updateBanStatePresence } from "$lib/realtimeState.svelte";
+    import { getPresenceState, updateBanStatePresence, updatePickStatePresence } from "$lib/realtimeState.svelte";
     import Deck from "./deck.svelte";
     import { flip } from "svelte/animate";
 
@@ -25,10 +25,30 @@
 
         return b;
     });
+    let picks = $derived.by(() => {
+        let b : number[] = [];
+
+        if(uuid != ''){
+            if(presenceState[uuid] == undefined)
+                return b;
+
+            b.push(...presenceState[uuid][0].picks);
+        }
+        else{
+            const values = Object.values(presenceState);
+            for (let i = 0; i < values.length; i++) {
+                b.push(...values[i][0].picks)
+            }
+        }
+
+        return b;
+    });
 
     function toggleBan(index : number){
-        if(blacklist)
+        if(blacklist){
+            togglePick(index);
             return;
+        }
 
         let b = bans;
         if(b.includes(index))
@@ -39,7 +59,12 @@
     }
 
     function togglePick(index: number){
+        let b = picks;
+        if(b.includes(index))
+            b.splice(b.indexOf(index), 1);
+        else if(b.length < 2) b.push(index);
 
+        updatePickStatePresence(b);
     }
 
     function shouldRemoveIndex(index: number) : boolean{
@@ -49,6 +74,7 @@
     function getClassName(index: number) : string {
         let className = 'deck-container';
         className += bans.includes(index) ? ' banned' : '';
+        className += picks.includes(index) ? ' picked' : '';
         className += shouldRemoveIndex(index) ? ' removed' : '';
         return className;
     }
@@ -113,7 +139,7 @@
         }
     }
 
-    .banned{
+    .banned, .picked{
         opacity: 10%;
         scale: 94%;
     }
