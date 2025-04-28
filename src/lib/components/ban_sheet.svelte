@@ -27,6 +27,9 @@
     });
 
     function toggleBan(index : number){
+        if(blacklist)
+            return;
+
         let b = bans;
         if(b.includes(index))
             b.splice(b.indexOf(index), 1);

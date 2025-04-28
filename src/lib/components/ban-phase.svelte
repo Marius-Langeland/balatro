@@ -7,7 +7,7 @@
     import { updateStatusStatePresence } from '$lib/realtimeState.svelte';
     import { authState } from '$lib/supabaseClient.svelte';
     import { bounceOut } from 'svelte/easing';
-    import { slide } from 'svelte/transition';
+    import { fly, slide } from 'svelte/transition';
 
     let { users, presenceState } = $props();
     const isStateDefined = (uuid: string) => presenceState[uuid] != undefined;
@@ -28,9 +28,15 @@
     </div>
 
     <div class="phase">
-        <Animated>
-            <Interactable colorIndex={3}>Ban phase</Interactable>
-        </Animated>
+        {#if status(authState.session?.user.id ?? '') == 'picking'}
+        <div in:fly={{x: 50, easing: bounceOut, opacity: 1}}>
+            <Animated><Interactable colorIndex={2}>Pick phase</Interactable></Animated>
+        </div>
+        {:else}
+        <div in:fly={{x: 50, easing: bounceOut, opacity: 1}}>
+            <Animated><Interactable colorIndex={3}>Ban phase</Interactable></Animated>
+        </div>
+        {/if}
         <Animated>
             <Interactable callback={() => updateStatusStatePresence('picking')}>Ready!</Interactable>
         </Animated>
