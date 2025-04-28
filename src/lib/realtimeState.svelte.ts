@@ -2,17 +2,18 @@ import type { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-
 import { supabase } from "$lib/supabaseClient.svelte.js";
 import type { Tables, Database } from "$lib";
 import { authState } from "$lib/supabaseClient.svelte.js";
-import type { Bans } from "./balatro.svelte";
+
+interface MatchState{
+    bans: number[],
+    status: string,
+};
 
 let channel: RealtimeChannel | null = $state(null);
 let match: Tables<'Match'> | null = $state.raw(null);
 let users : any = $state.raw([]);
-let presenceState: RealtimePresenceState<{bans: number[]}> = $state({});
-let clientBans : number[] = $state([]);
+let presenceState: RealtimePresenceState<MatchState> = $state({});
 
 export const getPresenceState = () => presenceState;
-export const getClientBans = () => clientBans;
-export const setClientBans = (x: number[]) => {clientBans = x}
 export const getMatch = () => match;
 export const getUsers = () => users;
 
@@ -77,46 +78,28 @@ export function joinMatchChannel(){
         }
     });
 
-    console.log('topic', topic);
-
     channel
     .on('presence', { event: 'sync' }, () => {
         if(channel == undefined)
             return;
 
-        const newState = channel.presenceState<{bans: number[]}>();
+        const newState = channel.presenceState<MatchState>();
         presenceState = newState;
     })
-    //.on('presence', { event: 'join' }, ({ key, newPresences }) => {
-    //    console.log('join', key, newPresences);
-    //})
-    //.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-    //    console.log('leave', key, leftPresences);
-    //})
-    .subscribe(async (status) => {
-        if(status !== 'SUBSCRIBED') return;
-
-        const trackStatus = await channel?.track({ bans: clientBans});
-        console.log(trackStatus);
-    });
-
+    .subscribe();
 }
 
-export function broadcastBans(bans: number[]){
-    if(match == null || channel == null)
-        return;
-
-    channel
-    .send({
-        type: 'broadcast',
-        event: 'ban',
-        payload: { bans: bans },
-    })
-    .then((response) => console.log(response, channel?.topic));
+let state : MatchState = {
+    bans: [],
+    status: 'offline',
+};
+export function updateBanStatePresence(bans: number[]){
+    state.bans = bans;
+    channel?.track(state);
 }
-
-export async function updateBanStatePresence(bans: number[]){
-    channel?.track({bans: bans});
+export function updateStatusStatePresence(phase: string){
+    state.status = phase;
+    channel?.track(state);
 }
 
 export async function queryUsers(match: Tables<'Match'>){

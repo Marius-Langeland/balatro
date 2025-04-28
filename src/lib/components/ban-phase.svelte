@@ -4,33 +4,40 @@
     import BannedDecks from '$lib/components/banned-decks.svelte';
     import Interactable from '$lib/components/interactable.svelte';
     import User from '$lib/components/user.svelte';
+    import { updateStatusStatePresence } from '$lib/realtimeState.svelte';
+    import { authState } from '$lib/supabaseClient.svelte';
     import { bounceOut } from 'svelte/easing';
-    import { fly } from 'svelte/transition';
+    import { slide } from 'svelte/transition';
 
     let { users, presenceState } = $props();
+    const isStateDefined = (uuid: string) => presenceState[uuid] != undefined;
+    const status = (uuid: string) => !isStateDefined(uuid) ? 'offline' : presenceState[uuid][0].status;
 </script>
 
 <div class="content">
     <div class="players">
-        {#each users as user}
-            <div transition:fly={{x: 50, easing: bounceOut, opacity: 1}} class="user-info panel">
-                <User user={user}/>
-                <BannedDecks bans={presenceState[user.uuid] == undefined ? [] :presenceState[user.uuid][0].bans}/>
+        {#each users as user, index}
+            <div transition:slide={{axis: 'x', easing: bounceOut, delay: 400*index}} class="user-info panel">
+                <div class="status-panel">
+                    <User user={user}/>
+                    <div class="status">{status(user.uuid)}</div>
+                </div>
+                <BannedDecks bans={!isStateDefined(user.uuid) ? [] : presenceState[user.uuid][0].bans}/>
             </div>
         {/each}
     </div>
 
-    <div class="phase panel">
+    <div class="phase">
         <Animated>
             <Interactable colorIndex={3}>Ban phase</Interactable>
         </Animated>
+        <Animated>
+            <Interactable callback={() => updateStatusStatePresence('picking')}>Ready!</Interactable>
+        </Animated>
     </div>
 
-    <div class="ban-sheet">
-        <BanSheet/>
-    </div>
-
-    <div class="banned-deck other">
+    <div class="ban-sheet panel">
+        <BanSheet blacklist={status(authState.session?.user.id ?? '') == 'picking'}/>
     </div>
 </div>
 
@@ -38,25 +45,23 @@
     .content{
         display: grid;
         gap: 1rem;
-        max-width: min(1200px, 50vw);
-
-        grid-template-columns: 1fr minmax(min-content, 400px);
-
+        grid-template-rows: min-content min-content;
+        grid-template-rows: min-content;
         grid-template-areas:
-        "ph ph"
+        "ph pl"
         "bs pl";
     }
 
     
     .ban-sheet{
         grid-area: bs;
-    }
-
-    .banned-deck{
-        align-self: center;
-
-        &:is(.other) {grid-area: p1;}
-    }
+        max-height: var(--height);
+        background-color: var(--clr-pallete-5);
+        scrollbar-width: none;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 1rem;
+    }   
 
     .players{
         display: flex;
@@ -74,7 +79,25 @@
         }
     }
 
+    .status-panel{
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .status{
+        background-color: var(--clr-pallete-0);
+        padding: 0 1rem;
+        border-radius: 5rem;
+        color: rgb(177, 192, 78);
+        font-size: 2rem;
+    }
+
     .phase{
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
         font-size: calc(1rem + 2vw);
         grid-area: ph;
     }

@@ -1,13 +1,30 @@
 <script lang="ts">
     import { deck_list } from "$lib/balatro.svelte";
-    import { getClientBans, updateBanStatePresence, setClientBans } from "$lib/realtimeState.svelte";
+    import { getPresenceState, updateBanStatePresence } from "$lib/realtimeState.svelte";
     import Deck from "./deck.svelte";
     import { flip } from "svelte/animate";
 
-    let { blacklist = false }
-    :   { blacklist?: boolean } = $props();
+    let { blacklist = false, uuid = '' } = $props();
 
-    let bans = $derived(getClientBans());
+    let presenceState = $derived(getPresenceState());
+    let bans = $derived.by(() => {
+        let b : number[] = [];
+
+        if(uuid != ''){
+            if(presenceState[uuid] == undefined)
+                return b;
+
+            b.push(...presenceState[uuid][0].bans);
+        }
+        else{
+            const values = Object.values(presenceState);
+            for (let i = 0; i < values.length; i++) {
+                b.push(...values[i][0].bans)
+            }
+        }
+
+        return b;
+    });
 
     function toggleBan(index : number){
         let b = bans;
@@ -15,7 +32,6 @@
             b.splice(b.indexOf(index), 1);
         else if(b.length < 3) b.push(index);
 
-        setClientBans(b);
         updateBanStatePresence(b);
     }
 
@@ -31,7 +47,7 @@
     }
 </script>
 
-<div class="ban panel">
+<div class="ban">
     {#each Object.entries(deck_list) as [deckName, deckData], index (deckName)}
         <button animate:flip class={getClassName(index)}
             onclick={() => toggleBan(index)}>
@@ -51,16 +67,12 @@
     }
 
     .ban{
-        grid-column: 1/-1;
-        display: flex;
+        display: grid;
         flex-wrap: wrap;
         justify-content: center;
         gap: 1rem;
-        padding: 1rem;
-
-        background-color: var(--clr-pallete-5);
-        overflow-y: scroll;
-        scrollbar-width: none;
+        height: 100%;
+        grid-template-columns: repeat(5, 1fr);
     }
 
     .deck-container{

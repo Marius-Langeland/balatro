@@ -24,7 +24,6 @@
 <style>
     .ban{
         display: flex;
-        padding: .5rem;
         gap: .5rem;
     }
 </style>
