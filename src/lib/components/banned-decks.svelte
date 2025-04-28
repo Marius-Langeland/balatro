@@ -5,11 +5,14 @@
     import { fly } from "svelte/transition";
     import { bounceOut} from "svelte/easing";
 
-    let { bans } : { bans: number[] } = $props();
+    let { bans, count = 3 } : { bans: number[], count: number } = $props();
     let decks = $derived.by(() => {
-        if(bans == undefined || bans == null)
-        return [15, 16, 17];
-        return [bans[0] ?? 15, bans[1] ?? 16, bans[2] ?? 17];
+        let b: number[] = [];
+
+        for (let i = 0; i < count; i++) {
+            b[i] = bans[i] ?? i + 15;
+        }
+        return b;
     })
 </script>
 

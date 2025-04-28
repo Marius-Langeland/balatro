@@ -12,6 +12,16 @@
     let { users, presenceState } = $props();
     const isStateDefined = (uuid: string) => presenceState[uuid] != undefined;
     const status = (uuid: string) => !isStateDefined(uuid) ? 'offline' : presenceState[uuid][0].status;
+    const deck = (uuid: string) : number[] => {
+        if(isStateDefined(uuid)){
+            if(status(uuid) == 'picking')
+                return presenceState[uuid][0].picks;
+            
+            return presenceState[uuid][0].bans;
+        }
+
+        return [];
+    };
 </script>
 
 <div class="content">
@@ -22,7 +32,7 @@
                     <User user={user}/>
                     <div class="status">{status(user.uuid)}</div>
                 </div>
-                <BannedDecks bans={!isStateDefined(user.uuid) ? [] : presenceState[user.uuid][0].bans}/>
+                <BannedDecks bans={deck(user.uuid)} count={status(user.uuid) == 'picking' ? 2 : 3}/>
             </div>
         {/each}
     </div>
