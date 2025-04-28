@@ -4,17 +4,15 @@
     import BannedDecks from '$lib/components/banned-decks.svelte';
     import Interactable from '$lib/components/interactable.svelte';
     import User from '$lib/components/user.svelte';
-    import { updateStatusStatePresence } from '$lib/realtimeState.svelte';
+    import { updateStatusStatePresence, getStatus, isStateDefined } from '$lib/realtimeState.svelte';
     import { authState } from '$lib/supabaseClient.svelte';
     import { bounceOut } from 'svelte/easing';
     import { fly, slide } from 'svelte/transition';
 
     let { users, presenceState } = $props();
-    const isStateDefined = (uuid: string) => presenceState[uuid] != undefined;
-    const status = (uuid: string) => !isStateDefined(uuid) ? 'offline' : presenceState[uuid][0].status;
     const deck = (uuid: string) : number[] => {
         if(isStateDefined(uuid)){
-            if(status(uuid) == 'picking')
+            if(getStatus(uuid) == 'picking' || getStatus(uuid) == 'waiting')
                 return presenceState[uuid][0].picks;
             
             return presenceState[uuid][0].bans;
@@ -22,6 +20,23 @@
 
         return [];
     };
+
+    const readyButton = () => {
+        if(getStatus(authState.session?.user.id ?? '') == 'banning')
+            updateStatusStatePresence('picking');
+        else if(getStatus(authState.session?.user.id ?? '') == 'picking')
+            updateStatusStatePresence('waiting');
+    }
+
+    const count = (uuid : string) : number => {
+        let status = getStatus(uuid);
+
+        if(status == 'banning') return 3;
+        if(status == 'offline') return 3;
+        if(status == 'picking') return 2;
+
+        return 2;
+    }
 </script>
 
 <div class="content">
@@ -30,30 +45,36 @@
             <div transition:slide={{axis: 'x', easing: bounceOut, delay: 400*index}} class="user-info panel">
                 <div class="status-panel">
                     <User user={user}/>
-                    <div class="status">{status(user.uuid)}</div>
+                    <div class="status">{getStatus(user.uuid)}</div>
                 </div>
-                <BannedDecks bans={deck(user.uuid)} count={status(user.uuid) == 'picking' ? 2 : 3}/>
+                <BannedDecks bans={deck(user.uuid)} count={count(user.uuid)}/>
             </div>
         {/each}
     </div>
 
     <div class="phase">
-        {#if status(authState.session?.user.id ?? '') == 'picking'}
+        {#if getStatus(authState.session?.user.id ?? '') == 'picking'}
         <div in:fly={{x: 50, easing: bounceOut, opacity: 1}}>
             <Animated><Interactable colorIndex={2}>Pick phase</Interactable></Animated>
+        </div>
+        {:else if getStatus(authState.session?.user.id ?? '') == 'waiting'}
+        <div in:fly={{x: 50, easing: bounceOut, opacity: 1}}>
+            <Animated><Interactable colorIndex={1}>Waiting</Interactable></Animated>
         </div>
         {:else}
         <div in:fly={{x: 50, easing: bounceOut, opacity: 1}}>
             <Animated><Interactable colorIndex={3}>Ban phase</Interactable></Animated>
         </div>
         {/if}
+        {#if getStatus(authState.session?.user.id ?? '') != 'waiting'}
         <Animated>
-            <Interactable callback={() => updateStatusStatePresence('picking')}>Ready!</Interactable>
+            <Interactable callback={readyButton}>Ready!</Interactable>
         </Animated>
+        {/if}
     </div>
 
     <div class="ban-sheet panel">
-        <BanSheet blacklist={status(authState.session?.user.id ?? '') == 'picking'}/>
+        <BanSheet whitelist={getStatus(authState.session?.user.id ?? '') == 'waiting'} blacklist={getStatus(authState.session?.user.id ?? '') == 'picking'}/>
     </div>
 </div>
 

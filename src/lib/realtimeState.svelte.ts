@@ -107,6 +107,9 @@ export function updateStatusStatePresence(phase: string){
     state.status = phase;
     channel?.track(state);
 }
+export const isStateDefined = (uuid: string) => presenceState[uuid] != undefined;
+export const getStatus = (uuid: string) => !isStateDefined(uuid) ? 'offline' : presenceState[uuid][0].status;
+
 
 export async function queryUsers(match: Tables<'Match'>){
     let u: Database['public']['Functions']['get_user']['Returns'][] = [];
