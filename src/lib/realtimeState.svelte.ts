@@ -5,6 +5,7 @@ import { authState } from "$lib/supabaseClient.svelte.js";
 
 interface MatchState{
     bans: number[],
+    picks: number[],
     status: string,
 };
 
@@ -91,6 +92,7 @@ export function joinMatchChannel(){
 
 let state : MatchState = {
     bans: [],
+    picks: [],
     status: 'offline',
 };
 export function updateBanStatePresence(bans: number[]){

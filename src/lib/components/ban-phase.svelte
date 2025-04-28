@@ -51,6 +51,7 @@
     .content{
         display: grid;
         gap: 1rem;
+        padding: 1rem;
         grid-template-rows: min-content min-content;
         grid-template-rows: min-content;
         grid-template-areas:
@@ -64,9 +65,7 @@
         max-height: var(--height);
         background-color: var(--clr-pallete-5);
         scrollbar-width: none;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding: 1rem;
+        padding: .5rem;
     }   
 
     .players{

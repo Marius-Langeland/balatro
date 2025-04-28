@@ -38,6 +38,10 @@
         updateBanStatePresence(b);
     }
 
+    function togglePick(index: number){
+
+    }
+
     function shouldRemoveIndex(index: number) : boolean{
         return index == 15 || index == 16 || index == 17 || (blacklist && bans.includes(index));
     }
@@ -52,8 +56,7 @@
 
 <div class="ban">
     {#each Object.entries(deck_list) as [deckName, deckData], index (deckName)}
-        <button animate:flip class={getClassName(index)}
-            onclick={() => toggleBan(index)}>
+        <button animate:flip class={getClassName(index)} onclick={() => toggleBan(index)}>
             <div class="deck-data">
                 <span>{deckName}</span>
                 <span>{@html deckData.description}</span>
@@ -73,7 +76,7 @@
         display: grid;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 1rem;
+        gap: 1rem .5rem;
         height: 100%;
         grid-template-columns: repeat(5, 1fr);
     }
@@ -116,5 +119,11 @@
     }
     .removed{
         display: none;
+    }
+
+    @media (max-width: 900px){
+        .ban{
+            grid-template-columns: repeat(3, 1fr);
+        }
     }
 </style>
