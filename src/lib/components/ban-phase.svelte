@@ -82,7 +82,7 @@
     .status-panel{
         display: flex;
         width: 100%;
-        align-items: center;
+        align-items: start;
         justify-content: space-between;
     }
 
